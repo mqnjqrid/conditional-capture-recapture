@@ -4,18 +4,18 @@ library(plyr)
 library(ggpubr)
 library(gridExtra)
 library(Jmisc)
+n = 5000;l = 3
 source("C:/Users/manja/Dropbox/conditional_capture_recapture/codes/indep_cov_simulation.R")
 source("C:/Users/manja/Dropbox/conditional_capture_recapture/codes/estimate_pseudoor.R")
 simuldraw = 100
-n = 1000;l = 2
-alpha_vec = c(0.25)
+alpha_vec = c(0.1, 0.25, 0.5)
 omega_vec = c(0.5, 1)
 datorg = numeric(0)
 mseorg = numeric(0)
-theta0 =  dat_p(10000, l)$theta0
+theta0 =  dat_p(1000, l)$theta0
 psi0 = 1/theta0
 theta0
-for(n in c(5000, 10000, 15000)){
+for(n in c(5000)){
   print(n)
   for(alp in 1:length(alpha_vec)) {
     alpha = alpha_vec[alp]
@@ -48,10 +48,10 @@ datorg = data.frame(datorg)
 mseorg = data.frame(mseorg)
 mseorg[,1:6] = sqrt(mseorg[,1:6])
 mseorgagg = aggregate(cbind(plugin , plugin.or, pseudo, pseudo.or, drl, drl.or) ~ alpha + omega + n, data = mseorg, median)
-datorgagg = aggregate(cbind(plugin , plugin.or, pseudo, pseudo.or, drl, drl.or) ~ iter + alpha + omega + n, data = datorg, mean)
-datorgagg = melt(datorgagg, id.vars = c("iter", "alpha", "omega", "n"))
-datorgagg$value = abs(datorgagg$value - psi0)
-datorgagg1 = aggregate(value ~ variable + alpha + omega + n, data = datorgagg, mean)
+datorgagg = aggregate(cbind(plugin , pseudo, pseudo.or, drl, drl.or) ~ iter + alpha + omega + n + plugin.or, data = datorg, mean)
+datorgagg = melt(datorgagg, id.vars = c("iter", "alpha", "omega", "n", "plugin.or"))
+
+datorgagg = aggregate(value ~ variable + alpha + omega + n + plugin.or, data = datorgagg, mean)
 
 mseorgagg = melt(mseorgagg, id.vars = c("alpha", "omega", "n"))
 
@@ -62,6 +62,11 @@ mseorgagg = melt(mseorgagg, id.vars = c("alpha", "omega", "n"))
 #theta0 = 0.6;psio = 1/theta0
 
 tsize = 12
+ggplot(data = datorgagg) +
+  geom_point(aes(x = plugin.or, y = value, color = variable)) +
+  theme(text = element_text(size = tsize), axis.text.x = element_blank(), axis.ticks.x=element_blank(), axis.title.x=element_blank(), legend.position = "bottom") +
+  labs(title = substitute(paste("MSE of ", gamma, '(v), ', theta, ' = ', var), list(var = round(theta0, 1))), x = NULL, y = NULL) + 
+  facet_grid(omega*n ~ alpha, labeller = label_both, scales = "free_y")
 
 v1 = ggplot(data = mseorgagg[mseorgagg$variable %in% c("plugin", "drl", "drl.or"),]) +
   geom_bar(mapping =  aes(x = n, y = value, fill = variable), stat = "identity", color = "black", position = "dodge") +
@@ -80,7 +85,7 @@ v2 = ggplot(data = mseorgagg[mseorgagg$variable %in% c("plugin", "drl", "drl.or"
   facet_grid(omega ~ alpha, labeller = label_both, scales = "free_y")
 v2
 
-ggplot(data = datorgagg1) +
+ggplot(data = datorgagg) +
   geom_bar(mapping =  aes(x = n, y = value, fill = variable), stat = "identity", color = "black", position = "dodge") +
   # ylim(c(0, 1)) + #yupperborder)) +
   theme(text = element_text(size = tsize), axis.text.x = element_blank(), axis.ticks.x=element_blank(), axis.title.x=element_blank(), legend.position = "bottom") +

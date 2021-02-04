@@ -4,9 +4,11 @@ expit = function(x) {
 logit = function(x) {
   log(x/(1 - x))
 }
-ep_vec = c(-3.906, -3.414, -3.009, -2.664, -2.31, -1.974, -1.545, -0.975)
+#ep_vec = c(-3.906, -3.414, -3.009, -2.664, -2.31, -1.974, -1.545, -0.9765, -0.48)
 #for l = 1, capture probabilities are 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9
-ep = ep_vec[7]
+ep_vec = c(-4.2, -3.906, -3.414, -3.009, -2.664, -2.31, -1.974, -1.545, -0.9765, -0.48, 0)
+#l = 3: 0.3, 0.4
+ep = ep_vec[it]
 pi1 = function(x) {
   expit( ep + sum(c(0.4)*x))
 }
@@ -19,7 +21,7 @@ dat_p = function(n, l){
   y2 = unlist(apply(x, 1, function(xi) {sample(c(0, 1), 1, replace = TRUE, prob = c( 1 - pi2(xi), pi2(xi)))}))
   xp = x + matrix(rnorm(n*l, 0, 0.5), ncol = l)
   List_matrix = cbind(y1, y2, x)
-  List_matrix_xstar = cbind(y1, y2, abs(x)^2)
+  List_matrix_xstar = cbind(y1, y2, xp)
   
   p1 = unlist(apply(x, 1, pi1))
   p2 = unlist(apply(x, 1, pi2))
@@ -33,11 +35,7 @@ dat_p = function(n, l){
               ))
 }
 
-dam = numeric(length = 100)
-for(i in 1:100){
-  dam[i] = dat_p(1000, 2)$theta0
-}
-summary(dam)
+print(dat_p(1000, l)$theta0)
 # Qnphi = mean(sapply(1:1, function(i) { 
 #   x = matrix(
 #     rnorm(n*l, 0, 1),
@@ -46,4 +44,3 @@ summary(dam)
 #   y2 = unlist(apply(x, 1, function(xi) {sample(c(0, 1), 1, replace = TRUE, prob = c( 1 - pi2(xi), pi2(xi)))}))
 #   mean((q1*q2/q12 *(y1/q1 + y2/q2 - y1*y2/q12 - 1))[pmax(y1, y2) > 0])
 # }))
-

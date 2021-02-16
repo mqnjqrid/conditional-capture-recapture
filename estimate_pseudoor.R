@@ -54,6 +54,9 @@ estim_pseudoor = function(List_matrix, n, K, omega, alpha, v = v, plot = FALSE){
   }else{
     drl.or = predict(cv.glmnet(xmat[set1 == 1,v], pseudo.or[set1 == 1]), xmat[,v], type="response", s="lambda.min")
   }
+  model <- KernSmooth::locpoly(xmat[set1 == 1,v], pseudo.or[set1 == 1], bandwidth = 0.1)
+  drlk.or = sapply(xmat[,v], function(xi){model$y[which.min(abs(model$x - xi))]})
+
   # plot(plugin.or, drl.or)
   # plot(gammainv.or, drl.or)
   #  X = seq(min(xmat[,1]), max(xmat[,1]), length.out = 50)
@@ -86,6 +89,8 @@ estim_pseudoor = function(List_matrix, n, K, omega, alpha, v = v, plot = FALSE){
   }else{
     drl = predict(cv.glmnet(xmat[set1 == 1,v], pseudo[set1 == 1]), xmat[,v], type="response", s="lambda.min")
   }
+  model <- KernSmooth::locpoly(xmat[set1 == 1,v], pseudo[set1 == 1], bandwidth = 0.1)
+  drlk = sapply(xmat[,v], function(xi){model$y[which.min(abs(model$x - xi))]})
 
   if(plot == TRUE){
     ymin = min(drl, plugin, drl.or, 1/(1-(1-p1)*(1-p2)))
@@ -96,8 +101,8 @@ estim_pseudoor = function(List_matrix, n, K, omega, alpha, v = v, plot = FALSE){
     points(plugin.or, drl.or, pch = 19, cex = 0.4)
   }
   return(list(plugin = plugin, plugin.or = plugin.or, gammainv.or = gammainv.or,
-              pseudo = pseudo, pseudo.or = pseudo.or,
-              drl = drl, drl.or = drl.or, vvec = xmat[,v], set1 = set1))
+              pseudo = pseudo, pseudo.or = pseudo.or, drl = drl, drl.or = drl.or,
+              drlk.or = drlk.or, drlk = drlk, vvec = xmat[,v], set1 = set1))
 }
 
 ymin = min(drl, plugin, drl.or, 1/(1-(1-p1)*(1-p2)))

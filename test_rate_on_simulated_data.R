@@ -10,7 +10,7 @@ n0 = 30000/10
 K = 2
 l = 1
 source("C:/Users/manja/Dropbox/conditional_capture_recapture/codes/indep_cov_simulation.R")
-source("C:/Users/manja/Dropbox/conditional_capture_recapture/codes/kernel/estimate_pseudoor.R")
+source("C:/Users/manja/Dropbox/conditional_capture_recapture/codes/estimate_pseudoor.R")
 realtrue = TRUE
 simuldraw = 100/10
 
